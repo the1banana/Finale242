@@ -1,23 +1,76 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
-/**
- * Created by the1banana on 11/7/2014.
- */
 public class MainDisplay extends JFrame {
 
     Game currentGame;
 
-    private void makeNewGame(){
+    private boolean checkActive(){
+        if(currentGame == null) {
+            JOptionPane.showMessageDialog(this, "No active project!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        } else {
+            return true;
+        }
+    }
 
+    private void makeNewGame(){
+        String name = (String)JOptionPane.showInputDialog(this,
+                "Give your game a title:\n",
+                "New Game - Title",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                null,
+                "The Greatest Game");
+        currentGame = new Game(name);
+        setTitle("Finale 242 - RPG Builder - " + currentGame.getName());
+    }
+
+    private void makeNewTile(){
+        if(checkActive()) {
+            JFileChooser imageOpen = new JFileChooser();
+            imageOpen.addChoosableFileFilter(new FileNameExtensionFilter("PNG files", "PNG"));
+            imageOpen.addChoosableFileFilter(new FileNameExtensionFilter("GIF files", "GIF"));
+            imageOpen.addChoosableFileFilter(new FileNameExtensionFilter("Bitmap files", "BMP"));
+            int ret = imageOpen.showDialog(this, "Open Tile Graphic");
+            File file = imageOpen.getSelectedFile();
+            BufferedImage tileImage = null;
+            try {
+                tileImage = ImageIO.read(file);
+                currentGame.addTile(new Tile(tileImage));
+                TileEditor edit = new TileEditor(currentGame, currentGame.getTiles().length - 1);
+                edit.setVisible(true);
+            } catch (IOException e) {
+                System.out.println("Cannot read file.");
+            }
+        }
+    }
+
+    private void openEditor(){
+        if(checkActive()) {
+            if (currentGame.getTiles().length > 1) {
+                TileEditor editor = new TileEditor(currentGame, 1);
+                editor.setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "No tiles added!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     public MainDisplay() {
         currentGame = null;
         //set the behavior/appearance of main pane
         setTitle("Finale 242 - RPG Builder");
-        setSize(400, 200);
+        setSize(600, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -49,8 +102,25 @@ public class MainDisplay extends JFrame {
 
         JMenuItem newRoom = new JMenuItem("New");
         newRoom.setToolTipText("Create a new room.");
+
         JMenuItem editRoom = new JMenuItem("Edit");
         editRoom.setToolTipText("Edit a previously made room.");
+
+        JMenuItem newTile = new JMenuItem("New");
+        newTile.setToolTipText("Create a new tile.");
+        newTile.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent event){
+                makeNewTile();
+            }
+        });
+
+        JMenuItem editTile = new JMenuItem("Edit");
+        editTile.setToolTipText("Edit a previously made tile.");
+        editTile.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent event){
+                openEditor();
+            }
+        });
 
         JMenu file = new JMenu("File");
         file.add(newGame);
@@ -63,9 +133,14 @@ public class MainDisplay extends JFrame {
         room.add(newRoom);
         room.add(editRoom);
 
+        JMenu tile = new JMenu("Tile");
+        tile.add(newTile);
+        tile.add(editTile);
+
         JMenuBar menubar = new JMenuBar();
         menubar.add(file);
         menubar.add(room);
+        menubar.add(tile);
 
         setJMenuBar(menubar);
     }
