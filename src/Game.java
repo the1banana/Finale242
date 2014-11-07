@@ -1,5 +1,4 @@
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -10,13 +9,15 @@ import java.io.IOException;
 public class Game {
     private Tile[] tiles;
     private Room[] rooms;
-    private Character[] party;
+    //by not explicitly defining attributes, it permits better flexibility of combat design
+    private Attribute[] attributes;
+    private Unit[] party;
     private String name;
 
     public Game (String name){
         this.name = name;
-        party = new Character[4];
-        party[0] = new Character();
+        party = new Unit[4];
+        party[0] = new Unit();
         rooms = null;
         tiles = new Tile[1];
         BufferedImage nullTile = null;
