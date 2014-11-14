@@ -3,18 +3,18 @@
  */
 public class BasicAttack extends Ability {
 
-    public BasicAttack(Unit owner){
+    public BasicAttack(String name){
         manaCost = 0;
-        name = "Basic Attack";
-        this.owner = owner;
+        this.name = name;
     }
 
-    public void useAbility (Unit target){
+    public void useAbility (Unit user, Unit target){
         int damage = 0;
-        if(owner.getWeapon() != null ) {
-            damage += owner.getWeapon().getDamage();
+        if(user.getWeapon() != null ) {
+            damage += user.getWeapon().getDamage(user);
+        } else {
+            damage = user.getStrength();
         }
-        damage += owner.getStrength();
         target.takeDamage(damage, false);
     }
 }

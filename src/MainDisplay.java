@@ -1,6 +1,5 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +10,7 @@ import java.io.IOException;
 public class MainDisplay extends JFrame {
 
     Game currentGame;
+    File defaultPath = new File("C:/");
 
     private boolean checkActive(){
         if(currentGame == null) {
@@ -37,17 +37,24 @@ public class MainDisplay extends JFrame {
     private void makeNewTile(){
         if(checkActive()) {
             JFileChooser imageOpen = new JFileChooser();
+            imageOpen.setCurrentDirectory(defaultPath);
             imageOpen.addChoosableFileFilter(new FileNameExtensionFilter("PNG files", "PNG"));
             imageOpen.addChoosableFileFilter(new FileNameExtensionFilter("GIF files", "GIF"));
             imageOpen.addChoosableFileFilter(new FileNameExtensionFilter("Bitmap files", "BMP"));
             int ret = imageOpen.showDialog(this, "Open Tile Graphic");
             File file = imageOpen.getSelectedFile();
+            defaultPath = imageOpen.getCurrentDirectory();
             BufferedImage tileImage = null;
             try {
                 tileImage = ImageIO.read(file);
-                currentGame.addTile(new Tile(tileImage));
-                TileEditor edit = new TileEditor(currentGame, currentGame.getTiles().length - 1);
-                edit.setVisible(true);
+                if(tileImage.getWidth() == 32 && tileImage.getHeight() == 32) {
+                    currentGame.addTile(new Tile(tileImage));
+                    TileEditor edit = new TileEditor(currentGame, currentGame.getTiles().size() - 1, defaultPath);
+                    edit.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Please select a 32x32 image.",
+                            "Size error.", JOptionPane.ERROR_MESSAGE);
+                }
             } catch (IOException e) {
                 System.out.println("Cannot read file.");
             }
@@ -56,8 +63,8 @@ public class MainDisplay extends JFrame {
 
     private void openEditor(){
         if(checkActive()) {
-            if (currentGame.getTiles().length > 1) {
-                TileEditor editor = new TileEditor(currentGame, 1);
+            if (currentGame.getTiles().size() > 1) {
+                TileEditor editor = new TileEditor(currentGame, 1, defaultPath);
                 editor.setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this, "No tiles added!",
